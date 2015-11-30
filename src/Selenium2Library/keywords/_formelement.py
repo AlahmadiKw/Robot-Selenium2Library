@@ -1,6 +1,9 @@
 import os
+from retrying import retry
 from keywordgroup import KeywordGroup
 from selenium.common.exceptions import WebDriverException
+
+from _custom import searchframes
 
 class _FormElementKeywords(KeywordGroup):
 
@@ -67,6 +70,8 @@ class _FormElementKeywords(KeywordGroup):
         """
         self._page_should_not_contain_element(locator, 'checkbox', message, loglevel)
 
+    @retry(stop_max_attempt_number=20, wait_fixed=500)
+    @searchframes
     def select_checkbox(self, locator):
         """Selects checkbox identified by `locator`.
 
@@ -165,6 +170,8 @@ class _FormElementKeywords(KeywordGroup):
 
     # Public, text fields
 
+    @retry(stop_max_attempt_number=20, wait_fixed=500)
+    @searchframes
     def choose_file(self, locator, file_path):
         """Inputs the `file_path` into file input field found by `locator`.
 
@@ -180,6 +187,8 @@ class _FormElementKeywords(KeywordGroup):
                         % file_path)
         self._element_find(locator, True, True).send_keys(file_path)
 
+    @retry(stop_max_attempt_number=20, wait_fixed=500)
+    @searchframes
     def input_password(self, locator, text):
         """Types the given password into text field identified by `locator`.
 
@@ -190,6 +199,8 @@ class _FormElementKeywords(KeywordGroup):
         self._info("Typing password into text field '%s'" % locator)
         self._input_text_into_text_field(locator, text)
 
+    @retry(stop_max_attempt_number=20, wait_fixed=500)
+    @searchframes
     def input_text(self, locator, text):
         """Types the given `text` into text field identified by `locator`.
 

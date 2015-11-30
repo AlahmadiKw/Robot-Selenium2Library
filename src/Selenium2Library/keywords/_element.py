@@ -1,3 +1,5 @@
+from retrying import retry
+
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.remote.webelement import WebElement
@@ -5,6 +7,8 @@ from Selenium2Library import utils
 from Selenium2Library.locators import ElementFinder
 from Selenium2Library.locators import CustomLocator
 from keywordgroup import KeywordGroup
+
+from _custom import searchframes
 
 try:
     basestring  # attempt to evaluate basestring
@@ -111,6 +115,7 @@ class _ElementKeywords(KeywordGroup):
                                  "but did not" % text)
         self._info("Current page contains text '%s'." % text)
 
+    @retry(stop_max_attempt_number=20, wait_fixed=500)
     def page_should_contain(self, text, loglevel='INFO'):
         """Verifies that current page contains `text`.
 
@@ -251,6 +256,8 @@ class _ElementKeywords(KeywordGroup):
                           "but it is." % locator
             raise AssertionError(message)
 
+    @retry(stop_max_attempt_number=20, wait_fixed=500, retry_on_exception=ValueError)
+    @searchframes
     def element_text_should_be(self, locator, expected, message=''):
         """Verifies element identified by `locator` exactly contains text `expected`.
 
@@ -344,6 +351,8 @@ class _ElementKeywords(KeywordGroup):
 
     # Public, mouse input/events
 
+    @retry(stop_max_attempt_number=30, wait_fixed=500)
+    @searchframes
     def click_element(self, locator):
         """Click element identified by `locator`.
 

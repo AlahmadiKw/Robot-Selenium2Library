@@ -1,6 +1,9 @@
 import time
+from retrying import retry
 import robot
 from keywordgroup import KeywordGroup
+
+from _custom import searchframes
 
 class _WaitingKeywords(KeywordGroup):
 
@@ -230,6 +233,8 @@ class _WaitingKeywords(KeywordGroup):
             return None if function(*args) else error
         self._wait_until_no_error(timeout, wait_func)
 
+    @retry(stop_max_attempt_number=20, wait_fixed=500)
+    @searchframes
     def _wait_until_no_error(self, timeout, wait_func, *args):
         timeout = robot.utils.timestr_to_secs(timeout) if timeout is not None else self._timeout_in_secs
         maxtime = time.time() + timeout

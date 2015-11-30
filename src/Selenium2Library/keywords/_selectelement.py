@@ -1,5 +1,8 @@
 from selenium.webdriver.support.ui import Select
+from retrying import retry
 from keywordgroup import KeywordGroup
+
+from _custom import searchframes
 
 class _SelectElementKeywords(KeywordGroup):
 
@@ -144,6 +147,8 @@ class _SelectElementKeywords(KeywordGroup):
         for i in range(len(select.options)):
             select.select_by_index(i)
 
+    @retry(stop_max_attempt_number=20, wait_fixed=500)
+    @searchframes
     def select_from_list(self, locator, *items):
         """Selects `*items` from list identified by `locator`
 
