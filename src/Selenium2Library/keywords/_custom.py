@@ -6,6 +6,9 @@ from selenium.common.exceptions import WebDriverException
 
 template = "An exception of type {0} occured. Arguments:\n{1!r}"
 
+def retry_if_value_error(exception):
+    return isinstance(exception, ValueError)
+
 def searchframes(func):
     @wraps(func)
     def func_wrapper(self, *args):

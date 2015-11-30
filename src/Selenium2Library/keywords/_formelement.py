@@ -3,7 +3,7 @@ from retrying import retry
 from keywordgroup import KeywordGroup
 from selenium.common.exceptions import WebDriverException
 
-from _custom import searchframes
+from _custom import searchframes, retry_if_value_error
 
 class _FormElementKeywords(KeywordGroup):
 
@@ -23,7 +23,8 @@ class _FormElementKeywords(KeywordGroup):
         element.submit()
 
     # Public, checkboxes
-
+    @retry(stop_max_attempt_number=20, wait_fixed=500, retry_on_exception=retry_if_value_error)
+    @searchframes
     def checkbox_should_be_selected(self, locator):
         """Verifies checkbox identified by `locator` is selected/checked.
 

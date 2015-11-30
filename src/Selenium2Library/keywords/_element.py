@@ -8,7 +8,7 @@ from Selenium2Library.locators import ElementFinder
 from Selenium2Library.locators import CustomLocator
 from keywordgroup import KeywordGroup
 
-from _custom import searchframes
+from _custom import searchframes, retry_if_value_error
 
 try:
     basestring  # attempt to evaluate basestring
@@ -217,6 +217,8 @@ class _ElementKeywords(KeywordGroup):
         if not self._is_enabled(locator):
             raise AssertionError("Element '%s' is disabled." % (locator))
 
+    @retry(stop_max_attempt_number=20, wait_fixed=500, retry_on_exception=retry_if_value_error)
+    @searchframes
     def element_should_be_visible(self, locator, message=''):
         """Verifies that the element identified by `locator` is visible.
 
@@ -256,7 +258,7 @@ class _ElementKeywords(KeywordGroup):
                           "but it is." % locator
             raise AssertionError(message)
 
-    @retry(stop_max_attempt_number=20, wait_fixed=500, retry_on_exception=ValueError)
+    @retry(stop_max_attempt_number=20, wait_fixed=500, retry_on_exception=retry_if_value_error)
     @searchframes
     def element_text_should_be(self, locator, expected, message=''):
         """Verifies element identified by `locator` exactly contains text `expected`.
