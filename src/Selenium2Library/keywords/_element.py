@@ -238,7 +238,7 @@ class _ElementKeywords(KeywordGroup):
             if not message:
                 message = "The element '%s' should be visible, but it "\
                           "is not." % locator
-            raise AssertionError(message)
+            raise ValueError(message)
 
     def element_should_not_be_visible(self, locator, message=''):
         """Verifies that the element identified by `locator` is NOT visible.

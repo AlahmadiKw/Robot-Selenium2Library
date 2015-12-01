@@ -15,7 +15,11 @@ def searchframes(func):
         try:
             func(self, *args)
             return
-        except Exception as ex:
+        except WebDriverException as ex:
+            self._debug("Failed to locate element. Searching in frames...")
+            message = template.format(type(ex).__name__, ex.args)
+            self._debug(message)
+        except ValueError as ex:
             self._debug("Failed to locate element. Searching in frames...")
             message = template.format(type(ex).__name__, ex.args)
             self._debug(message)
@@ -36,8 +40,12 @@ def searchframes(func):
                 browser.switch_to_default_content()
                 found = True
                 return found
-            except Exception as ex:
+            except WebDriverException as ex:
                 self._debug("offf Failed to locate element at this frame.")
+                message = template.format(type(ex).__name__, ex.args)
+                self._debug(message)
+            except ValueError as ex:
+                self._debug("Failed to locate element. Searching in frames...")
                 message = template.format(type(ex).__name__, ex.args)
                 self._debug(message)
 

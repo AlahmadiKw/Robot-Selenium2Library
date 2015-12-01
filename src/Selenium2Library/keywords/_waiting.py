@@ -233,7 +233,7 @@ class _WaitingKeywords(KeywordGroup):
             return None if function(*args) else error
         self._wait_until_no_error(timeout, wait_func)
 
-    @retry(stop_max_attempt_number=20, wait_fixed=500)
+    @retry(stop_max_attempt_number=1200, wait_fixed=500)
     @searchframes
     def _wait_until_no_error(self, timeout, wait_func, *args):
         timeout = robot.utils.timestr_to_secs(timeout) if timeout is not None else self._timeout_in_secs
@@ -242,7 +242,7 @@ class _WaitingKeywords(KeywordGroup):
             timeout_error = wait_func(*args)
             if not timeout_error: return
             if time.time() > maxtime:
-                raise AssertionError(timeout_error)
+                raise ValueError(timeout_error)
             time.sleep(0.2)
 
     def _format_timeout(self, timeout):
