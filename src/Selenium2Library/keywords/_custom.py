@@ -2,7 +2,7 @@ import os
 from functools import wraps
 from retrying import retry
 from keywordgroup import KeywordGroup
-from selenium.common.exceptions import WebDriverException
+from selenium.common.exceptions import WebDriverException, StaleElementReferenceException
 
 template = "An exception of type {0} occured. Arguments:\n{1!r}"
 
@@ -15,11 +15,7 @@ def searchframes(func):
         try:
             func(self, *args)
             return
-        except WebDriverException as ex:
-            self._debug("Failed to locate element. Searching in frames...")
-            message = template.format(type(ex).__name__, ex.args)
-            self._debug(message)
-        except ValueError as ex:
+        except (WebDriverException, ValueError) as ex:
             self._debug("Failed to locate element. Searching in frames...")
             message = template.format(type(ex).__name__, ex.args)
             self._debug(message)
@@ -40,12 +36,8 @@ def searchframes(func):
                 browser.switch_to_default_content()
                 found = True
                 return found
-            except WebDriverException as ex:
+            except (WebDriverException, ValueError) as ex:
                 self._debug("offf Failed to locate element at this frame.")
-                message = template.format(type(ex).__name__, ex.args)
-                self._debug(message)
-            except ValueError as ex:
-                self._debug("Failed to locate element. Searching in frames...")
                 message = template.format(type(ex).__name__, ex.args)
                 self._debug(message)
 
@@ -53,8 +45,14 @@ def searchframes(func):
                 for ifr in subframes:
                     browser.switch_to_default_content()
                     for frame in frame_path:
-                        browser.switch_to_frame(frame)
-                    browser.switch_to_frame(ifr)
+                        try:
+                            browser.switch_to_frame(frame)
+                        except StaleElementReferenceException:
+                            return False
+                    try:
+                        browser.switch_to_frame(ifr)
+                    except StaleElementReferenceException:
+                        return False
                     frame_path.append(ifr)
                     found = _traverse_frames(self, frame_path, found, c)
                     frame_path.remove(ifr)
