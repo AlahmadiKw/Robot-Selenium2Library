@@ -545,8 +545,9 @@ class _BrowserManagementKeywords(KeywordGroup):
         return browser
 
     def _make_ie(self , remote , desired_capabilities , profile_dir):
+        parsed = self._parse_capabilities_string(desired_capabilities)
         return self._generic_make_browser(webdriver.Ie,
-                webdriver.DesiredCapabilities.INTERNETEXPLORER, remote, desired_capabilities)
+                webdriver.DesiredCapabilities.INTERNETEXPLORER, remote, parsed)
 
     def _make_chrome(self , remote , desired_capabilities , profile_dir):
         return self._generic_make_browser(webdriver.Chrome,
@@ -584,7 +585,11 @@ class _BrowserManagementKeywords(KeywordGroup):
         '''most of the make browser functions just call this function which creates the
         appropriate web-driver'''
         if not remote_url:
-            browser = webdriver_type()
+            if desired_caps:
+                desired_cap_type.update(desired_caps)
+            else: 
+                desired_cap_type.update({})
+            browser = webdriver_type(capabilities=desired_cap_type)
         else:
             browser = self._create_remote_web_driver(desired_cap_type,remote_url , desired_caps)
         return browser
@@ -597,7 +602,7 @@ class _BrowserManagementKeywords(KeywordGroup):
 
         if type(desired_capabilities) in (str, unicode):
             desired_capabilities = self._parse_capabilities_string(desired_capabilities)
-
+        self._debug(desired_capabilities)
         desired_capabilities_object.update(desired_capabilities or {})
 
         return webdriver.Remote(desired_capabilities=desired_capabilities_object,
@@ -614,6 +619,12 @@ class _BrowserManagementKeywords(KeywordGroup):
 
         for cap in capabilities_string.split(","):
             (key, value) = cap.split(":", 1)
-            desired_capabilities[key.strip()] = value.strip()
+            if value.lower() == 'true':
+                parsed_val = True
+            elif value.lower() == 'false':
+                parsed_val = False 
+            else: 
+                parsed_val = value.strip()
+            desired_capabilities[key.strip()] = parsed_val
 
         return desired_capabilities
