@@ -68,6 +68,8 @@ class _SelectElementKeywords(KeywordGroup):
             raise ValueError("Select list with locator '%s' does not have any selected values")
         return self._get_values_for_options(options)
 
+    @retry(stop_max_attempt_number=20, wait_fixed=500)
+    @searchframes
     def list_selection_should_be(self, locator, *items):
         """Verifies the selection of select list identified by `locator` is exactly `*items`.
 

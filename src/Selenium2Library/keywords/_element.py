@@ -817,7 +817,7 @@ return !element.dispatchEvent(evt);
                 message = "Page should have contained %s '%s' but did not"\
                            % (element_name, locator)
             self.log_source(loglevel)
-            raise AssertionError(message)
+            raise ValueError(message)
         self._info("Current page contains %s '%s'." % (element_name, locator))
 
     def _page_should_not_contain_element(self, locator, tag, message, loglevel):

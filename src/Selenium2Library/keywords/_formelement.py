@@ -248,6 +248,8 @@ class _FormElementKeywords(KeywordGroup):
             raise AssertionError(message)
         self._info("Text field '%s' contains text '%s'." % (locator, expected))
 
+    @retry(stop_max_attempt_number=20, wait_fixed=500)
+    @searchframes
     def textfield_value_should_be(self, locator, expected, message=''):
         """Verifies the value in text field identified by `locator` is exactly `expected`.
 
@@ -263,7 +265,8 @@ class _FormElementKeywords(KeywordGroup):
             if not message:
                 message = "Value of text field '%s' should have been '%s' "\
                           "but was '%s'" % (locator, expected, actual)
-            raise AssertionError(message)
+            self._debug(message)
+            raise ValueError(message)
         self._info("Content of text field '%s' is '%s'." % (locator, expected))
 
     def textarea_should_contain(self, locator, expected, message=''):
