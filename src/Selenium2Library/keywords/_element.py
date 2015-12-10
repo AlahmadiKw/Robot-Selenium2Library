@@ -323,6 +323,8 @@ class _ElementKeywords(KeywordGroup):
         """
         return self._get_value(locator)
 
+    @retry(stop_max_attempt_number=30, wait_fixed=500)
+    @searchframes
     def get_text(self, locator):
         """Returns the text value of element identified by `locator`.
 
