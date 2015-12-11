@@ -13,18 +13,17 @@ def searchframes(func):
     @wraps(func)
     def func_wrapper(self, *args):
         try:
-            func(self, *args)
-            return
+            return func(self, *args)
         except (WebDriverException, ValueError) as ex:
             self._debug("Failed to locate element. Searching in frames...")
             message = template.format(type(ex).__name__, ex.args)
             self._debug(message)
 
-        def _traverse_frames(self, frame_path, found, c=0):
+        def _traverse_frames(self, frame_path, found, func_return=None, c=0):
             # https://groups.google.com/forum/#!topic/webdriver/OYh9mLtLdeo
             # http://stackoverflow.com/questions/16166261/selenium-webdriver-stale-element-reference-exception
             if found:
-                return found
+                return (found, func_return)
 
             browser = self._current_browser()
 
@@ -32,10 +31,10 @@ def searchframes(func):
             self._debug("traverseing %d frames... " % len(subframes))
 
             try:
-                func(self, *args)
+                func_return = func(self, *args)
                 browser.switch_to_default_content()
                 found = True
-                return found
+                return (found, func_return)
             except (WebDriverException, ValueError) as ex:
                 self._debug("offf Failed to locate element at this frame.")
                 message = template.format(type(ex).__name__, ex.args)
@@ -54,15 +53,17 @@ def searchframes(func):
                     except StaleElementReferenceException:
                         return False
                     frame_path.append(ifr)
-                    found = _traverse_frames(self, frame_path, found, c)
+                    (found, func_return) = _traverse_frames(self, frame_path, found, func_return, c)
                     frame_path.remove(ifr)
 
-            return found
+            return (found, func_return)
 
-        success = _traverse_frames(self, [], False)
+        (success, func_return) = _traverse_frames(self, [], False)
         if not success:
             self._current_browser().switch_to_default_content()
             raise ValueError("Element locator did not found in any frames.")
+
+        return func_return
 
     return func_wrapper
 
